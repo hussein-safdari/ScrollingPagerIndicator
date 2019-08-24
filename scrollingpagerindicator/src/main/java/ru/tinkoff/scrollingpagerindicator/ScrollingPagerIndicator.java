@@ -11,6 +11,8 @@ import androidx.annotation.Nullable;
 import androidx.core.view.ViewCompat;
 import androidx.viewpager.widget.ViewPager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
+
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.View;
@@ -19,6 +21,12 @@ import android.view.View;
  * @author Nikita Olifer
  */
 public class ScrollingPagerIndicator extends View {
+
+    private final int VP = 1;
+    private final int VP2 = 2;
+    private final int RV = 3;
+
+    private int pagerType = VP;
 
     private int infiniteDotCount;
 
@@ -198,7 +206,18 @@ public class ScrollingPagerIndicator extends View {
      * @param pager pager to attach
      */
     public void attachToPager(@NonNull ViewPager pager) {
+        pagerType = VP;
         attachToPager(pager, new ViewPagerAttacher());
+    }
+
+    /**
+     * Attaches indicator to ViewPager2
+     *
+     * @param pager pager to attach
+     */
+    public void attachToPager(@NonNull ViewPager2 pager) {
+        pagerType = VP2;
+        attachToPager(pager, new ViewPager2Attacher());
     }
 
     /**
@@ -216,6 +235,7 @@ public class ScrollingPagerIndicator extends View {
      * @param recyclerView recycler view to attach
      */
     public void attachToRecyclerView(@NonNull RecyclerView recyclerView) {
+        pagerType = RV;
         attachToPager(recyclerView, new RecyclerViewAttacher());
     }
 
@@ -297,22 +317,47 @@ public class ScrollingPagerIndicator extends View {
         } else if (page < 0 || page != 0 && page >= itemCount) {
             throw new IndexOutOfBoundsException("page must be [0, adapter.getItemCount())");
         }
-
+        page = getRTLPosition(page);
         if (!looped || itemCount <= visibleDotCount && itemCount > 1) {
             dotScale.clear();
 
             scaleDotByOffset(page, offset);
 
             if (page < itemCount - 1) {
-                scaleDotByOffset(page + 1, 1 - offset);
+                if (pagerType == VP2 && isRtl())
+                    scaleDotByOffset(page - 1, 1 - offset);
+                else
+                    scaleDotByOffset(page + 1, 1 - offset);
             } else if (itemCount > 1) {
-                scaleDotByOffset(0, 1 - offset);
+                if (pagerType == VP2 && isRtl())
+                    scaleDotByOffset(page - 1, 1 - offset);
+                else
+                    scaleDotByOffset(0, 1 - offset);
+
             }
 
             invalidate();
         }
-        adjustFramePosition(offset, page);
+
+        if (pagerType == VP2 && isRtl())
+            adjustFramePosition(1- offset, page -1);
+        else
+            adjustFramePosition(offset, page);
+
         invalidate();
+    }
+
+    /**
+     * Gets the RTL position of the position in any adapter
+     */
+    private int getRTLPosition(int position){
+        if (!isRtl()) return position;
+        return itemCount - position - 1;
+    }
+
+    private boolean isRtl(){
+        if (pagerType == VP) return false;
+        return ViewCompat.getLayoutDirection(this) == ViewCompat.LAYOUT_DIRECTION_RTL;
     }
 
     /**
@@ -336,6 +381,7 @@ public class ScrollingPagerIndicator extends View {
         if (itemCount == 0) {
             return;
         }
+        position = getRTLPosition(position);
         adjustFramePosition(0, position);
         updateScaleInIdleState(position);
     }
