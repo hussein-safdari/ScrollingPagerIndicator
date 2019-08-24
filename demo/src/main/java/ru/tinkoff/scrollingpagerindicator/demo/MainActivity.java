@@ -6,6 +6,9 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
+
 import android.view.Display;
 import android.view.WindowManager;
 import android.widget.NumberPicker;
@@ -30,11 +33,21 @@ public class MainActivity extends AppCompatActivity {
         ScrollingPagerIndicator pagerIndicator = findViewById(R.id.pager_indicator);
         pagerIndicator.attachToPager(pager);
 
+
+        // Setup ViewPager2 with indicator
+        ViewPager2 pager2 = findViewById(R.id.pager2);
+        DemoRecyclerViewAdapter pager2Adapter = new DemoRecyclerViewAdapter(8);
+        pager2.setAdapter(pager2Adapter);
+
+        ScrollingPagerIndicator pager2Indicator = findViewById(R.id.pager2_indicator);
+        pager2Indicator.attachToPager(pager2);
+
+
         // Setup RecyclerView with indicator
         // One page will occupy 1/3 of screen width
         RecyclerView recyclerView = findViewById(R.id.recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        DemoRecyclerViewAdapter recyclerAdapter = new DemoRecyclerViewAdapter(8, screenWidth);
+        DemoRecyclerViewAdapter recyclerAdapter = new DemoRecyclerViewAdapter(8);
         recyclerView.setAdapter(recyclerAdapter);
 
         recyclerView.setPadding(screenWidth / 3, 0, screenWidth / 3, 0);
@@ -60,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             pagerIndicator.setVisibleDotCount(newVal);
+            pager2Indicator.setVisibleDotCount(newVal);
             recyclerIndicator.setVisibleDotCount(newVal);
         });
 
@@ -67,7 +81,11 @@ public class MainActivity extends AppCompatActivity {
             if (pager.getCurrentItem() >= newVal - 1) {
                 pager.setCurrentItem(newVal - 1, false);
             }
+            if (pager2.getCurrentItem() >= newVal - 1) {
+                pager2.setCurrentItem(newVal - 1, false);
+            }
             pagerAdapter.setCount(newVal);
+            pager2Adapter.setCount(newVal);
             recyclerAdapter.setCount(newVal);
         });
     }

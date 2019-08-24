@@ -12,11 +12,9 @@ import android.widget.TextView;
 public class DemoRecyclerViewAdapter extends RecyclerView.Adapter<DemoRecyclerViewAdapter.ViewHolder> {
 
     private int count;
-    private final int screenWidth;
 
-    DemoRecyclerViewAdapter(int count, int screenWidth) {
+    DemoRecyclerViewAdapter(int count) {
         this.count = count;
-        this.screenWidth = screenWidth;
     }
 
     void setCount(int count) {
@@ -28,7 +26,6 @@ public class DemoRecyclerViewAdapter extends RecyclerView.Adapter<DemoRecyclerVi
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.demo_page, parent, false);
-        view.getLayoutParams().width = screenWidth / 3;
         return new ViewHolder(view);
     }
 
